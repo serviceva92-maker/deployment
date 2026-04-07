@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+
+const FORMSPREE_ENDPOINT =
+  process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT ?? "https://formspree.io/f/xnjowvew";
 
 type WaitlistPayload = {
   name: string;
@@ -23,11 +25,17 @@ const MAX_LENGTHS = {
   vision: 1000,
 } as const;
 
+/**
+ * Normalizes raw input values to safe, bounded strings.
+ */
 function normalizeValue(value: unknown, maxLength: number): string {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
 }
 
+/**
+ * Maps unknown request input into the expected waitlist payload shape.
+ */
 function normalizePayload(raw: unknown): WaitlistPayload {
   const body = (raw ?? {}) as Record<string, unknown>;
   return {
@@ -42,22 +50,17 @@ function normalizePayload(raw: unknown): WaitlistPayload {
   };
 }
 
+/**
+ * Basic email format validation.
+ */
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/**
+ * Forwards waitlist submissions to Formspree for backward compatibility.
+ */
 export async function POST(request: Request) {
-  const resendKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL;
-  const toEmail = process.env.WAITLIST_TO_EMAIL;
-
-  if (!resendKey || !fromEmail || !toEmail) {
-    return NextResponse.json(
-      { error: "Email service is not configured on the server." },
-      { status: 500 }
-    );
-  }
-
   const payload = normalizePayload(await request.json().catch(() => null));
   const requiredValues = [
     payload.name,
@@ -78,47 +81,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
   }
 
-  const resend = new Resend(resendKey);
-
   try {
-    const adminEmail = resend.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      replyTo: payload.email,
-      subject: `New Franchise Application — ${payload.name}`,
-      text: [
-        "A new franchise waiting list application was submitted.",
-        "",
-        `Name: ${payload.name}`,
-        `Email: ${payload.email}`,
-        `Phone: ${payload.phone}`,
-        `Territory: ${payload.territory}`,
-        `Opportunity Type: ${payload.opportunity}`,
-        `Expected Investment: ${payload.investment}`,
-        `Trade/Experience: ${payload.trade}`,
-        "",
-        "Business Vision:",
-        payload.vision,
-      ].join("\n"),
+    const response = await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
     });
 
-    const userEmail = resend.emails.send({
-      from: fromEmail,
-      to: [payload.email],
-      subject: "We received your Betz Pools franchise application",
-      text: [
-        `Hi ${payload.name},`,
-        "",
-        "Thank you for applying to join the Betz Pools franchise waiting list.",
-        "Our team received your submission and will review it shortly.",
-        "",
-        "If you have any immediate questions, simply reply to this email.",
-        "",
-        "Betz Pools Franchise Team",
-      ].join("\n"),
-    });
+    if (!response.ok) {
+      const providerPayload = (await response.json().catch(() => null)) as
+        | { error?: string; errors?: { message?: string }[] }
+        | null;
+      const providerError = providerPayload?.errors?.[0]?.message ?? providerPayload?.error;
+      return NextResponse.json(
+        { error: providerError ?? "Unable to submit right now. Please try again." },
+        { status: 502 }
+      );
+    }
 
-    await Promise.all([adminEmail, userEmail]);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(

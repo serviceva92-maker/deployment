@@ -2,6 +2,9 @@
 
 import { FormEvent, useState } from "react";
 
+const FORMSPREE_ENDPOINT =
+  process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT ?? "https://formspree.io/f/xnjowvew";
+
 const initial = {
   name: "",
   email: "",
@@ -26,19 +29,21 @@ export function WaitlistForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/waitlist", {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(values),
       });
 
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as
-          | { error?: string }
+          | { error?: string; errors?: { message?: string }[] }
           | null;
-        setErrorMessage(payload?.error ?? "Unable to submit right now. Please try again.");
+        const providerError = payload?.errors?.[0]?.message ?? payload?.error;
+        setErrorMessage(providerError ?? "Unable to submit right now. Please try again.");
         return;
       }
 
@@ -68,7 +73,13 @@ export function WaitlistForm() {
             <p>Thank you. Our team will review and contact you shortly.</p>
           </div>
         ) : (
-          <form className="betz-mock-form-grid" onSubmit={onSubmit} noValidate>
+          <form
+            className="betz-mock-form-grid"
+            action={FORMSPREE_ENDPOINT}
+            method="POST"
+            onSubmit={onSubmit}
+            noValidate
+          >
             <div className="betz-mock-field">
               <label htmlFor="fran-name">Full Name</label>
               <input
