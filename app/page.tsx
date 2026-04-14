@@ -7,7 +7,6 @@ import { FranchiseHero } from "./franchise/components/FranchiseHero";
 import { FranchiseJourney } from "./franchise/components/FranchiseJourney";
 import { HeritageSection } from "./franchise/components/HeritageSection";
 import { IdealPartners } from "./franchise/components/IdealPartners";
-import { LifestyleBand } from "./franchise/components/LifestyleBand";
 import { ModelSection } from "./franchise/components/ModelSection";
 import { OpportunityIntro } from "./franchise/components/OpportunityIntro";
 import { Since1945Badge } from "./franchise/components/Since1945Badge";
@@ -29,7 +28,6 @@ export default function Home() {
         <WhatYouGet />
         <HeritageSection />
         <ModelSection />
-        <LifestyleBand />
         <Territories />
         <IdealPartners />
         <WaitlistForm />

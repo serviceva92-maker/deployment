@@ -33,9 +33,9 @@ export function useActiveSection(): string {
         }
       });
 
-      // Map retail-model and brand-refresh to "the-model" for menu highlighting
+      // Map retail-model, brand-refresh, and lifestyle to "the-model" for menu highlighting
       let displaySection = closestSection;
-      if (closestSection === 'retail-model' || closestSection === 'brand-refresh') {
+      if (closestSection === 'retail-model' || closestSection === 'brand-refresh' || closestSection === 'lifestyle') {
         displaySection = 'the-model';
       }
 
