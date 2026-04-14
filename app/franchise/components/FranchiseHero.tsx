@@ -13,6 +13,7 @@ export function FranchiseHero() {
 
   return (
     <section
+      id="hero"
       className="betz-mock-hero-section"
       style={sectionStyle}
       aria-labelledby="betz-mock-hero-title"

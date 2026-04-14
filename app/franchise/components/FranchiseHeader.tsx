@@ -29,8 +29,9 @@ function HeaderNavCaret() {
 /**
  * FranchiseHeader — floating white bar with logo, centered primary links, and Request Service CTA.
  * Purpose: match main betzpools.com header styling on the franchise landing page.
+ * @param activeSection - The ID of the currently active/visible section for menu highlighting
  */
-export function FranchiseHeader() {
+export function FranchiseHeader({ activeSection }: { activeSection: string }) {
   return (
     <div className={styles.franHeaderWrap}>
       <header className={styles.franHeader}>
@@ -44,27 +45,36 @@ export function FranchiseHeader() {
           />
         </Link>
         <nav className={styles.franHeaderNav} aria-label="Primary">
-          {franchiseHeaderNavItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className={styles.franHeaderNavLink}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {item.label}
-              {item.hasCaret ? <HeaderNavCaret /> : null}
-            </a>
-          ))}
+          {franchiseHeaderNavItems.map((item) => {
+            const isActive = activeSection === item.href.replace('#', '');
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className={`${styles.franHeaderNavLink} ${isActive ? styles.franHeaderNavLinkActive : ''}`}
+              >
+                {item.label}
+                {item.hasCaret ? <HeaderNavCaret /> : null}
+              </a>
+            );
+          })}
         </nav>
-        <a
-          href={franchiseHeaderServiceUrl}
-          className={styles.franHeaderCta}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Request Service
-        </a>
+        <div className={styles.franHeaderCtaGroup}>
+          <a
+            href={franchiseHeaderServiceUrl}
+            className={styles.franHeaderCta}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Request Service
+          </a>
+          <a
+            href="#apply"
+            className={styles.franHeaderCta}
+          >
+            Apply
+          </a>
+        </div>
       </header>
     </div>
   );

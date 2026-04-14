@@ -11,7 +11,7 @@ export function LifestyleBand() {
   } as CSSProperties;
 
   return (
-    <section className="betz-mock-life" style={sectionStyle}>
+    <section id="lifestyle" className="betz-mock-life" style={sectionStyle}>
       <p className="betz-mock-life-lead">Serving luxury clients and everyday pool owners</p>
     </section>
   );

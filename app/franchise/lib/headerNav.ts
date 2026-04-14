@@ -9,37 +9,17 @@ export type FranchiseHeaderNavItem = {
 };
 
 /**
- * Primary nav labels and targets — aligned with main site structure from design reference.
- * Paths follow common betzpools.com URLs; adjust if slugs change.
+ * Primary nav labels and targets — franchise landing page sections with anchor links for smooth scrolling.
  */
 export const franchiseHeaderNavItems: readonly FranchiseHeaderNavItem[] = [
-  { label: "Home", href: `${betzPoolsSiteBase}/`, hasCaret: false },
-  {
-    label: "Pool Maintenance Services",
-    href: `${betzPoolsSiteBase}/pool-maintenance/`,
-    hasCaret: true,
-  },
-  {
-    label: "Pools & Spas",
-    href: `${betzPoolsSiteBase}/custom-pool-design/`,
-    hasCaret: true,
-  },
-  {
-    label: "Renovations",
-    href: `${betzPoolsSiteBase}/pool-renovations/`,
-    hasCaret: true,
-  },
-  {
-    label: "Outdoor Living",
-    href: `${betzPoolsSiteBase}/outdoor-living/`,
-    hasCaret: true,
-  },
-  { label: "Careers", href: `${betzPoolsSiteBase}/careers/`, hasCaret: false },
-  {
-    label: "Company",
-    href: `${betzPoolsSiteBase}/contact-our-team/`,
-    hasCaret: true,
-  },
+  { label: "Opportunity", href: "#opportunity", hasCaret: false },
+  { label: "System", href: "#system", hasCaret: false },
+  { label: "What You Get", href: "#what-you-get", hasCaret: false },
+  { label: "Betz Story", href: "#heritage", hasCaret: false },
+  { label: "Model", href: "#the-model", hasCaret: false },
+  { label: "Lifestyle", href: "#lifestyle", hasCaret: false },
+  { label: "Territories", href: "#territories", hasCaret: false },
+  { label: "Ideal Partner", href: "#ideal-partners", hasCaret: false },
 ] as const;
 
 /** CTA — service request entry point on main site. */
