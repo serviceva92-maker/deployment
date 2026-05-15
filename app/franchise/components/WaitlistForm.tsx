@@ -2,10 +2,24 @@
 
 import { FormEvent, useState } from "react";
 
-const FORMSPREE_ENDPOINT =
-  process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT ?? "https://formspree.io/f/xnjowvew";
+const waitlist_api_endpoint = "/api/waitlist";
 
-const initial = {
+type WaitlistFormValues = {
+  name: string;
+  email: string;
+  phone: string;
+  territory: string;
+  opportunity: string;
+  investment: string;
+  trade: string;
+  vision: string;
+};
+
+type WaitlistErrorResponse = {
+  error?: string;
+};
+
+const initial: WaitlistFormValues = {
   name: "",
   email: "",
   phone: "",
@@ -22,14 +36,45 @@ export function WaitlistForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  /**
+   * Checks whether all required waitlist form values are present before submitting.
+   * @param formValues Current waitlist form state.
+   */
+  function hasRequiredFormValues(formValues: WaitlistFormValues): boolean {
+    return Object.values(formValues).every((value) => value.trim().length > 0);
+  }
+
+  /**
+   * Checks whether the submitted email has the basic shape expected for email delivery.
+   * @param email Current email field value.
+   */
+  function hasValidEmailFormat(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  /**
+   * Submits the waitlist form to the server API route for Resend delivery.
+   * @param e Browser form submit event.
+   */
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (isSubmitting) return;
     setErrorMessage("");
+
+    if (!hasRequiredFormValues(values)) {
+      setErrorMessage("Please fill in all required fields.");
+      return;
+    }
+
+    if (!hasValidEmailFormat(values.email)) {
+      setErrorMessage("Please provide a valid email address.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(FORMSPREE_ENDPOINT, {
+      const response = await fetch(waitlist_api_endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,11 +84,10 @@ export function WaitlistForm() {
       });
 
       if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as
-          | { error?: string; errors?: { message?: string }[] }
-          | null;
-        const providerError = payload?.errors?.[0]?.message ?? payload?.error;
-        setErrorMessage(providerError ?? "Unable to submit right now. Please try again.");
+        const payload = (await response.json().catch((): WaitlistErrorResponse => {
+          return {};
+        })) as WaitlistErrorResponse;
+        setErrorMessage(payload.error ?? "Unable to submit right now. Please try again.");
         return;
       }
 
@@ -75,7 +119,7 @@ export function WaitlistForm() {
         ) : (
           <form
             className="betz-mock-form-grid"
-            action={FORMSPREE_ENDPOINT}
+            action={waitlist_api_endpoint}
             method="POST"
             onSubmit={onSubmit}
             noValidate
@@ -84,7 +128,7 @@ export function WaitlistForm() {
               <label htmlFor="fran-name">Full Name</label>
               <input
                 id="fran-name"
-                name="full_name"
+                name="name"
                 type="text"
                 maxLength={100}
                 autoComplete="name"
